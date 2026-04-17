@@ -7,6 +7,7 @@ import argparse
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from data_prep.Normalizer import Normalizer
+from model.ngram_model import NGramModel
 
 def parse_step():
     parser = argparse.ArgumentParser()
@@ -28,20 +29,28 @@ def data_prep():
         quit()
     normalizer.normalize()
 
+def generate_model():
+    print("Generating model .....")
+    ngram_m = NGramModel()
+    ngram_m.run()
+
 if __name__ == "__main__":
     #version = importlib.metadata.version('python-dotenv')
     #print(f"python-dotenv version: {version}")
     step=parse_step()
     load_dotenv("config/.env")
+    for key, value in os.environ.items():
+        print(f"{key}: {value}")
     if(step == "dataprep"):
         data_prep()
         pass
     elif(step == "model"):
-        pass
+        generate_model()
     elif(step == "inference"):
         pass
     elif(step == "all"):
         data_prep()
+        generate_model()
         pass
     else:
         print("Wrong step provided.")
