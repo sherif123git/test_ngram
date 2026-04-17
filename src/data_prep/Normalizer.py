@@ -46,6 +46,7 @@ class Normalizer:
 
     def remove_whitespaces(self, text):
         text=re.sub(r"\s\s+", " ", text)
+        text.strip()
         return text
 
     def word_tokenize(self):
@@ -53,6 +54,7 @@ class Normalizer:
         print(f"Total num of words: {len(self.train_words)}")
 
     def normalize(self):
+        os.remove(os.environ.get("TRAIN_TOKENS"))
         for book in self.files_list:
             print(f"Loading book: {book}")
             with open(book, encoding="utf8") as f:
@@ -75,9 +77,17 @@ class Normalizer:
                     #final_text_buf.write(lineL)
                     #final_text_buf.write(' ')
                 
-                # save the processed files for debugging
+                # save each processed file for debugging
                 with open(f"{book}_.txtp", "w", encoding="utf8") as fw:
                     fw.write("\n".join(book_text_lines))
+
+                # append                
+                with open(os.environ.get("TRAIN_TOKENS"), "a", encoding="utf8") as fw:
+                    for i, line in enumerate(book_text_lines):
+                        if(line != ""):
+                            fw.write(line)
+                            fw.write("\n")
+                    fw.write("\n")
         self.word_tokenize()
 
 if __name__ == "__main__":

@@ -1,0 +1,9 @@
+# env file contents
+TRAIN_RAW_DIR=data/raw/train
+EVAL_RAW_DIR=data/raw/eval
+TRAIN_TOKENS=data/processed/train_tokens.txt
+EVAL_TOKENS=data/processed/eval_tokens.txt
+MODEL=data/model/model.json
+VOCAB=data/model/vocab.json
+UMK_THRESHOLD=3
+TOP_K=3
