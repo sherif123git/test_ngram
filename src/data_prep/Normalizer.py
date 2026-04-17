@@ -1,9 +1,12 @@
 import glob, os
 import re
+import io
 
 class Normalizer:
     files_list = []
     status = False
+    train_text=io.StringIO()
+    train_words=[]
 
     def __init__ (self):
         pass
@@ -30,7 +33,7 @@ class Normalizer:
         return text.lower()
 
     def remove_punctuation(self, text):
-        for char in "~!@#$^&*()-=_+?/.,';:\"[]\><`\|™":               
+        for char in "~!@#$^&*()-=_+?/.,';:\"[]\><`\|™“”‘’":
             text = text.replace(char, " ")
         # replace multiple spaces with one space
         text=re.sub(r"\s\s+", " ", text)
@@ -39,8 +42,15 @@ class Normalizer:
     def remove_numbers(self, text):
         for char in "0123456789":               
             text=text.replace(char, " ")
+        return text
+
+    def remove_whitespaces(self, text):
         text=re.sub(r"\s\s+", " ", text)
         return text
+
+    def word_tokenize(self):
+        self.train_words = self.train_text.getvalue().split()
+        print(f"Total num of words: {len(self.train_words)}")
 
     def normalize(self):
         for book in self.files_list:
@@ -56,9 +66,19 @@ class Normalizer:
                     lineL=self.lowercase(line)
                     lineL=self.remove_punctuation(lineL)
                     lineL=self.remove_numbers(lineL)
-
+                    lineL=self.remove_whitespaces(lineL)
+                    book_text_lines[i] = lineL
+                    if(book_text_lines[i]!=""):
+                        self.train_text.write(" ")
+                        self.train_text.write(book_text_lines[i])
+                        
                     #final_text_buf.write(lineL)
                     #final_text_buf.write(' ')
+                
+                # save the processed files for debugging
+                with open(f"{book}_.txtp", "w", encoding="utf8") as fw:
+                    fw.write("\n".join(book_text_lines))
+        self.word_tokenize()
 
 if __name__ == "__main__":
     pass
