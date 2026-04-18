@@ -58,8 +58,8 @@ class NGramModel:
         """
         st="he went to school and he went to the club and he went to his house".split()
         #self.train_tokens_words = st
-        print(self.generate_ngrams(st, 2))
-        print(self.generate_ngrams(st, 3))
+        #print(self.generate_ngrams(st, 2))
+        #print(self.generate_ngrams(st, 3))
 
         # Calculate the number of occurence --------------------------------------
         for n in range(1, int(os.environ.get("NGRAM_ORDER"))+1):
