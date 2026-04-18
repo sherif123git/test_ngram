@@ -42,7 +42,7 @@ class Normalizer:
 
     def remove_punctuation(self, text):
         """ Remove all punctuation """
-        for char in "~!@#$^&*()-=_+?/.,';:\"[]\><`\\|™“”‘’":
+        for char in "~!@#$^&*()-=_+?/.,';:\"[]><`\\|™“”‘’":
             text = text.replace(char, " ")
         # replace multiple spaces with one space
         text=re.sub(r"\s\s+", " ", text)
