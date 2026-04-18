@@ -16,7 +16,6 @@ class Predictor:
 
     def predict_next(self, text, k):
         return self.model.lookup(text, k)
-        pass
 
     def show_predictions(self, dict_words):
         print(f"Predictions: ", end="")
@@ -36,5 +35,6 @@ class Predictor:
             
             text = self.normalize(text)
             dict_words = self.predict_next(text, self.top_k)
+            self.show_predictions(dict_words)
             
 

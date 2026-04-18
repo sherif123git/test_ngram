@@ -1,6 +1,7 @@
 import os
 import json
 import re
+from collections import Counter
 
 class NGramModel:
     train_tokens=""
@@ -51,20 +52,20 @@ class NGramModel:
 
     def build_counts_and_probabilities(self):
         st="he went to school and he went to the club and he went to his house".split()
-        self.train_tokens_words = st
+        #self.train_tokens_words = st
         print(self.generate_ngrams(st, 2))
         print(self.generate_ngrams(st, 3))
 
         # Calculate the number of occurence --------------------------------------
         for n in range(1, int(os.environ.get("NGRAM_ORDER"))+1):
-            print(f"n={n}")
+            #print(f"n={n}")
         #for n in range(2, 3):
             ngram=f"{n}ngram"
             self.ngram_all[ngram] = {}
             table=self.generate_ngrams(self.train_tokens_words, n)
             for tupleitem in table:
                 sentence = " ".join(tupleitem)
-                print(sentence)
+                #print(sentence)
                 if(n==1):
                     if sentence in self.ngram_all[ngram]:
                         # increase the count by 1 if it already exists
@@ -86,7 +87,7 @@ class NGramModel:
                         self.ngram_all[ngram][sentence_t]={}
                         self.ngram_all[ngram][sentence_t][last_word] = 1
 
-        print(json.dumps(self.ngram_all, indent=4) )
+        #print(json.dumps(self.ngram_all, indent=4) )
         
         # Calculate the probabilities --------------------------------------
         for n in range(int(os.environ.get("NGRAM_ORDER")), 1, -1):
@@ -97,8 +98,8 @@ class NGramModel:
                 for word in self.ngram_all[ngram][sentence_dict]:
                     #ngram_p_key=sentence.rsplit(' ', 1)[0] # remove the last word
                     self.ngram_all[ngram][sentence_dict][word] = self.ngram_all[ngram][sentence_dict][word]/total
-        print(json.dumps(self.ngram_all, indent=4) )
-        
+        #print(json.dumps(self.ngram_all, indent=4) )
+
         # calculate probability for 1ngram
         count = sum(list(self.ngram_all["1ngram"].values()))
         print(count)
@@ -125,7 +126,7 @@ class NGramModel:
             self.vocab = json.load(file)
         with open(os.environ.get("MODEL"), 'r', encoding='utf-8') as file:
             self.ngram_all = json.load(file)
-        print(self.ngram_all)
+        #print(self.ngram_all)
     
     def get_last_n_words(self, sentence, n):
         # Split the sentence into a list of words
@@ -142,15 +143,22 @@ class NGramModel:
     def lookup(self, text, k):
         sentence=text.strip()
         count = 0
-        for n in range(self.ngram_order-1, 0, -1):
-            count, textslice = self.get_last_n_words(sentence, n)
-            if(textslice == ""):
-                continue
-            else:
-                print(f"Enough words found ({count})")
-                break
-        ngram=f"{count}ngram"
-        pass
+        words=[]
+        # for n in range(self.ngram_order-1, 0, -1):
+        count, textslice = self.get_last_n_words(sentence, self.ngram_order-1)
+        if(count == 0):
+            return []
+        
+        #print(f"Enough words found ({count})")
+
+        ngram=f"{count+1}ngram"
+        avail_dict = self.ngram_all[ngram][textslice]
+        top_k = int(os.environ.get("TOP_K"))
+        # if(len(avail_dict)>=top_k):
+        top_v = Counter(avail_dict).most_common(top_k)
+        top_words = [item[0] for item in top_v]
+        # else:
+        return top_words
 
     def run(self):
         self.build_vocab(os.environ.get("TRAIN_TOKENS"))
