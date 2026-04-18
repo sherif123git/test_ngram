@@ -5,10 +5,15 @@ import re
 class NGramModel:
     train_tokens=""
     train_tokens_words=[]
-    ngram_order = os.environ.get("NGRAM_ORDER")
+    ngram_order = 0
     vocab = {}
     vocab_prob = {}
     ngram_all = {}
+
+    def __init__(self):
+        self.ngram_order = int(os.environ.get("NGRAM_ORDER"))
+
+
     def build_vocab(self, token_file):
         with open(token_file) as f:
             train_tokens = f.read()
@@ -45,44 +50,61 @@ class NGramModel:
         return ngrams
 
     def build_counts_and_probabilities(self):
-        st="he went to school and he went to the club and he went to his house" 
+        st="he went to school and he went to the club and he went to his house".split()
         self.train_tokens_words = st
-        print(self.generate_ngrams(st.split(), 2))
-        print(self.generate_ngrams(st.split(), 3))
+        print(self.generate_ngrams(st, 2))
+        print(self.generate_ngrams(st, 3))
 
         # Calculate the number of occurence --------------------------------------
         for n in range(1, int(os.environ.get("NGRAM_ORDER"))+1):
+            print(f"n={n}")
         #for n in range(2, 3):
             ngram=f"{n}ngram"
             self.ngram_all[ngram] = {}
-            table=self.generate_ngrams(self.train_tokens_words.split(), n)
+            table=self.generate_ngrams(self.train_tokens_words, n)
             for tupleitem in table:
-                word = " ".join(tupleitem)
-                print(word)
-                if word in self.ngram_all[ngram]:
-                    # increase the count by 1 if it already exists
-                    self.ngram_all[ngram][word] = self.ngram_all[ngram][word]+1
+                sentence = " ".join(tupleitem)
+                print(sentence)
+                if(n==1):
+                    if sentence in self.ngram_all[ngram]:
+                        # increase the count by 1 if it already exists
+                        self.ngram_all[ngram][sentence] = self.ngram_all[ngram][sentence]+1
+                    else:
+                        # add the sentence if it does not exist
+                        self.ngram_all[ngram][sentence] = 1
                 else:
-                    # add the word if it does not exist
-                    self.ngram_all[ngram][word] = 1
-        print(self.ngram_all)
+                    sentence_t = sentence.rsplit(' ', 1)[0]
+                    last_word = sentence.split()[-1]
+                    if sentence_t in self.ngram_all[ngram]:
+                        # increase the count by 1 if it already exists
+                        if last_word in self.ngram_all[ngram][sentence_t]:
+                            self.ngram_all[ngram][sentence_t][last_word] = self.ngram_all[ngram][sentence_t][last_word] +1
+                        else:
+                            self.ngram_all[ngram][sentence_t][last_word] = 1
+                    else:
+                        # add the sentence if it does not exist                        
+                        self.ngram_all[ngram][sentence_t]={}
+                        self.ngram_all[ngram][sentence_t][last_word] = 1
 
+        print(json.dumps(self.ngram_all, indent=4) )
+        
         # Calculate the probabilities --------------------------------------
         for n in range(int(os.environ.get("NGRAM_ORDER")), 1, -1):
             ngram=f"{n}ngram"
             ngram_p=f"{n-1}ngram"
-            for sentence in self.ngram_all[ngram]:
-                ngram_p_key=sentence.rsplit(' ', 1)[0] # remove the last word
-                self.ngram_all[ngram][sentence] = self.ngram_all[ngram][sentence]/self.ngram_all[ngram_p][ngram_p_key]
+            for sentence_dict in self.ngram_all[ngram]:
+                total = sum(list(self.ngram_all[ngram][sentence_dict].values()))
+                for word in self.ngram_all[ngram][sentence_dict]:
+                    #ngram_p_key=sentence.rsplit(' ', 1)[0] # remove the last word
+                    self.ngram_all[ngram][sentence_dict][word] = self.ngram_all[ngram][sentence_dict][word]/total
+        print(json.dumps(self.ngram_all, indent=4) )
+        
         # calculate probability for 1ngram
         count = sum(list(self.ngram_all["1ngram"].values()))
         print(count)
         for word in self.ngram_all["1ngram"]:
             self.ngram_all["1ngram"][word] = self.ngram_all["1ngram"][word]/count
-        print(self.ngram_all)
-
-    def lookup(self):
-        pass
+        #print(self.ngram_all)
 
     def save_model(self, model_path):
         with open (model_path, "w") as fw:
@@ -98,7 +120,36 @@ class NGramModel:
             fw.write(jsonfile)
 
 
-    def load(self, vocab_path):
+    def load(self):
+        with open(os.environ.get("VOCAB"), 'r', encoding='utf-8') as file:
+            self.vocab = json.load(file)
+        with open(os.environ.get("MODEL"), 'r', encoding='utf-8') as file:
+            self.ngram_all = json.load(file)
+        print(self.ngram_all)
+    
+    def get_last_n_words(self, sentence, n):
+        # Split the sentence into a list of words
+        words = sentence.split()
+        
+        # Try to return n words, then n-1, down to 1
+        for count in range(n, 0, -1):
+            if len(words) >= count:
+                # Join the last 'count' words back into a string
+                return count, " ".join(words[-count:])
+        
+        return 0, "" # Return empty s
+
+    def lookup(self, text, k):
+        sentence=text.strip()
+        count = 0
+        for n in range(self.ngram_order-1, 0, -1):
+            count, textslice = self.get_last_n_words(sentence, n)
+            if(textslice == ""):
+                continue
+            else:
+                print(f"Enough words found ({count})")
+                break
+        ngram=f"{count}ngram"
         pass
 
     def run(self):

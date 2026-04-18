@@ -8,6 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from src.data_prep.Normalizer import Normalizer
 from src.model.ngram_model import NGramModel
+from src.inference.predictor import Predictor
 
 def parse_step():
     parser = argparse.ArgumentParser()
@@ -34,6 +35,14 @@ def generate_model():
     ngram_m = NGramModel()
     ngram_m.run()
 
+def inference():
+    print("Running Inference")
+    print("Type text")
+    normalizer = Normalizer()
+    ngram_m = NGramModel()
+    predictor = Predictor(ngram_m, normalizer)
+    predictor.run()
+
 if __name__ == "__main__":
     #version = importlib.metadata.version('python-dotenv')
     #print(f"python-dotenv version: {version}")
@@ -47,10 +56,12 @@ if __name__ == "__main__":
     elif(step == "model"):
         generate_model()
     elif(step == "inference"):
+        inference()
         pass
     elif(step == "all"):
         data_prep()
         generate_model()
+        inference()
         pass
     else:
         print("Wrong step provided.")
