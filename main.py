@@ -28,7 +28,7 @@ def data_prep():
     if(normalizer.status==False):
         print("Book list is empty, Exiting...")
         quit()
-    normalizer.normalize()
+    normalizer.run()
 
 def generate_model():
     print("Generating model .....")
@@ -48,21 +48,18 @@ if __name__ == "__main__":
     #print(f"python-dotenv version: {version}")
     step=parse_step()
     load_dotenv("config/.env")
-    for key, value in os.environ.items():
-        print(f"{key}: {value}")
+    # for key, value in os.environ.items():
+    #     print(f"{key}: {value}")
     if(step == "dataprep"):
         data_prep()
-        pass
     elif(step == "model"):
         generate_model()
     elif(step == "inference"):
         inference()
-        pass
     elif(step == "all"):
         data_prep()
         generate_model()
         inference()
-        pass
     else:
         print("Wrong step provided.")
         quit()

@@ -53,8 +53,19 @@ class Normalizer:
         self.train_words = self.train_text.getvalue().split()
         print(f"Total num of words: {len(self.train_words)}")
 
-    def normalize(self):
-        os.remove(os.environ.get("TRAIN_TOKENS"))
+    def normalize(self, line):
+        lineL=self.lowercase(line)
+        lineL=self.remove_punctuation(lineL)
+        lineL=self.remove_numbers(lineL)
+        lineL=self.remove_whitespaces(lineL)
+        return lineL
+
+    def run(self):
+        try:
+            os.remove(os.environ.get("TRAIN_TOKENS"))
+        except OSError:
+            pass
+        
         for book in self.files_list:
             print(f"Loading book: {book}")
             with open(book, encoding="utf8") as f:
@@ -65,10 +76,7 @@ class Normalizer:
 
                 for i, line in enumerate(book_text_lines):
                     # assume all chars are lower case
-                    lineL=self.lowercase(line)
-                    lineL=self.remove_punctuation(lineL)
-                    lineL=self.remove_numbers(lineL)
-                    lineL=self.remove_whitespaces(lineL)
+                    lineL = self.normalize(line)
                     book_text_lines[i] = lineL
                     if(book_text_lines[i]!=""):
                         self.train_text.write(" ")

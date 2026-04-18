@@ -143,7 +143,7 @@ class NGramModel:
     def lookup(self, text, k):
         sentence=text.strip()
         count = 0
-        words=[]
+        #words=[]
         # for n in range(self.ngram_order-1, 0, -1):
         count, textslice = self.get_last_n_words(sentence, self.ngram_order-1)
         if(count == 0):
