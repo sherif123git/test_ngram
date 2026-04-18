@@ -9,12 +9,16 @@ class Normalizer:
     train_words=[]
 
     def __init__ (self):
+        """ init task. Automatically called when the class is instantiated """
         pass
 
     def get_status(self):
         return self.status
 
     def load(self, folder_path):
+        """
+        Load all txt files from the source folder
+        """
         print(f"Searching path: {folder_path}")
         for file in glob.glob(f"{folder_path}/*.txt"):
             if file.endswith(".txt"):
@@ -25,26 +29,33 @@ class Normalizer:
         #print(f"Status: {self.status}")
 
     def strip_gutenberg(self, book_text):
+        """
+        Remove Gutenberg header and footer
+        """
         pattern=r"\s*\*\*\*.*?\*\*\*\s*(.*?)\s*\*\*\*.*?\*\*\*\s*"
         serach_res=re.search(pattern, book_text, re.DOTALL)
         return serach_res.group(1)
 
     def lowercase(self, text):
+        """ Lower case all text """
         return text.lower()
 
     def remove_punctuation(self, text):
-        for char in "~!@#$^&*()-=_+?/.,';:\"[]\><`\|™“”‘’":
+        """ Remove all punctuation """
+        for char in "~!@#$^&*()-=_+?/.,';:\"[]\><`\\|™“”‘’":
             text = text.replace(char, " ")
         # replace multiple spaces with one space
         text=re.sub(r"\s\s+", " ", text)
         return text
 
     def remove_numbers(self, text):
+        """ remove all numbers """
         for char in "0123456789":               
             text=text.replace(char, " ")
         return text
 
     def remove_whitespaces(self, text):
+        """ remove unneeded whitespaces"""
         text=re.sub(r"\s\s+", " ", text)
         text.strip()
         return text
@@ -54,6 +65,13 @@ class Normalizer:
         print(f"Total num of words: {len(self.train_words)}")
 
     def normalize(self, line):
+        """
+        apply all normalization steps in order: 
+        lowercase
+        remove_punctuation
+        remove numbers
+        remove white space
+        """
         lineL=self.lowercase(line)
         lineL=self.remove_punctuation(lineL)
         lineL=self.remove_numbers(lineL)
@@ -61,6 +79,7 @@ class Normalizer:
         return lineL
 
     def run(self):
+        """ This functions runs after instantiating the class """
         try:
             os.remove(os.environ.get("TRAIN_TOKENS"))
         except OSError:

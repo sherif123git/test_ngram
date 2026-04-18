@@ -12,10 +12,11 @@ class NGramModel:
     ngram_all = {}
 
     def __init__(self):
+        """ init task. Automatically called when the class is instantiated """
         self.ngram_order = int(os.environ.get("NGRAM_ORDER"))
 
-
     def build_vocab(self, token_file):
+        """ build vocabulary list """
         with open(token_file) as f:
             train_tokens = f.read()
             self.train_tokens_words = train_tokens.split()
@@ -51,6 +52,10 @@ class NGramModel:
         return ngrams
 
     def build_counts_and_probabilities(self):
+        """
+        count all n-gram at orders 1 through NGRAM_ORDER and compute 
+        MLE probabilities.
+        """
         st="he went to school and he went to the club and he went to his house".split()
         #self.train_tokens_words = st
         print(self.generate_ngrams(st, 2))
@@ -108,10 +113,12 @@ class NGramModel:
         #print(self.ngram_all)
 
     def save_model(self, model_path):
+        """ save the probability tables to model.json """
         with open (model_path, "w") as fw:
             json.dump(self.ngram_all, fw, indent=4)
 
     def save_vocab(self, vocab_path):
+        """ save vocabulary list to vocab.json """
         with open (vocab_path, "w") as fw:
             jsonfile = json.dumps(list(self.vocab))
             fw.write(jsonfile)
@@ -122,6 +129,7 @@ class NGramModel:
 
 
     def load(self):
+        """ load json files during inference """
         with open(os.environ.get("VOCAB"), 'r', encoding='utf-8') as file:
             self.vocab = json.load(file)
         with open(os.environ.get("MODEL"), 'r', encoding='utf-8') as file:
@@ -141,6 +149,11 @@ class NGramModel:
         return 0, "" # Return empty s
 
     def lookup(self, text, k):
+        """ backoff lookup 
+        try the highest-order context first, fall back to
+        lower orders down to 1-gram
+        return empty array if no match is found
+        """
         sentence=text.strip()
         count = 0
         #words=[]
