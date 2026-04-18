@@ -6,8 +6,8 @@ import argparse
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
-from data_prep.Normalizer import Normalizer
-from model.ngram_model import NGramModel
+from src.data_prep.Normalizer import Normalizer
+from src.model.ngram_model import NGramModel
 
 def parse_step():
     parser = argparse.ArgumentParser()
