@@ -152,6 +152,8 @@ class NGramModel:
         #print(f"Enough words found ({count})")
 
         ngram=f"{count+1}ngram"
+        if textslice not in self.ngram_all[ngram]:
+            return []
         avail_dict = self.ngram_all[ngram][textslice]
         top_k = int(os.environ.get("TOP_K"))
         # if(len(avail_dict)>=top_k):

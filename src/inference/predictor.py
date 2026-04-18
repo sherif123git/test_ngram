@@ -8,7 +8,7 @@ class Predictor:
         self.top_k = os.environ.get("TOP_K")
         
     def normalize(self, text):
-        textL = self.normalizer.lowercase(text)
+        textL = self.normalizer.normalize(text)
         return textL
 
     def map_oov(self):
